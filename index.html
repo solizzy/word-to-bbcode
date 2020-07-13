@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word -> BBCode</title>
+
+    <style>
+      html {
+        height: 100%;
+      }
+
+      body {
+        height: 100%;
+        margin: 0;
+        background: rgb(247, 244, 244);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #post {
+        resize: vertical;
+        overflow: auto;
+        padding: 10px;
+        width: 700px;
+        min-height: 1rem;
+        background: rgb(255, 255, 255);
+        box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1);
+        font-family: sans-serif;
+        line-height: 1.5;
+      }
+
+      #post * {
+        font-size: 1em !important; /* necessary if clipboard data has any inline stylings */
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="post" contenteditable></div>
+  </body>
+
+  <script>
+    function bbcode(wrapper, input) {
+      input
+        .querySelectorAll(wrapper)
+        .forEach(
+          (el) => (el.innerHTML = `[${wrapper}]${el.innerHTML}[/${wrapper}]`)
+        );
+    }
+
+    document.addEventListener("paste", function (e) {
+      let pasted = e.clipboardData.getData("text/html");
+      let pastedDOM = new DOMParser().parseFromString(pasted, "text/html") // necessary for DOM API functions like querySelector
+        .scrollingElement; //gets body
+      bbcode("b", pastedDOM);
+      bbcode("i", pastedDOM);
+      document.querySelector("#post").innerHTML = pastedDOM.innerHTML;
+      e.preventDefault(); //prevent double paste
+    });
+  </script>
+</html>
