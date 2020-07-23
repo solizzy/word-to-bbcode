@@ -56,7 +56,7 @@
         .scrollingElement; //gets body
       bbcode("b", pastedDOM);
       bbcode("i", pastedDOM);
-      document.querySelector("#post").innerHTML = pastedDOM.innerHTML;
+      document.querySelector("#post").innerHTML = pastedDOM.innerHTML.trim();
       e.preventDefault(); //prevent double paste
     });
   </script>
