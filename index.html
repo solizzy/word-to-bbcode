@@ -54,9 +54,25 @@
       let pasted = e.clipboardData.getData("text/html");
       let pastedDOM = new DOMParser().parseFromString(pasted, "text/html") // necessary for DOM API functions like querySelector
         .scrollingElement; //gets body
+
       bbcode("b", pastedDOM);
       bbcode("i", pastedDOM);
-      document.querySelector("#post").innerHTML = pastedDOM.innerHTML;
+
+      let text = "";
+
+      pastedDOM.querySelectorAll("p").forEach((el) => {
+        let part = el.textContent;
+        text += part + "\n\n";
+      });
+
+      text = text
+        .replace(/\[\w\]\[\/\w\]/g, "")
+        .trim()
+        .replace(/\n(\S)/g, " $1")
+        .replace(/\n/g,"\n\n")
+
+      document.querySelector("#post").innerText = text;
+
       e.preventDefault(); //prevent double paste
     });
   </script>
