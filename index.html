@@ -58,7 +58,7 @@
       bbcode("b", pastedDOM);
       bbcode("i", pastedDOM);
 
-      let text = "";
+      let text = "[bcolor]";
 
       pastedDOM.querySelectorAll("p").forEach((el) => {
         let part = el.textContent;
@@ -70,6 +70,11 @@
         .trim()
         .replace(/\n(\S)/g, " $1")
         .replace(/\n/g,"\n\n")
+      
+      text += `[/bcolor]
+[bcolor][align=center]
+OOC
+[/align][/bcolor]`
 
       document.querySelector("#post").innerText = text;
       e.preventDefault(); //prevent double paste
