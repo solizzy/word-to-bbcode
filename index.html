@@ -40,7 +40,7 @@
   </head>
 
   <body>
-    <div id="post"></div>
+    <div id="post" contenteditable></div>
   </body>
 
   <script>
@@ -79,7 +79,7 @@
 
       const container = document.querySelector("#post");
       container.innerText = text;
-      window.getSelection().selectAllChildren() //select text right away
+      window.getSelection().selectAllChildren(container) //select text right away
       e.preventDefault(); //prevent double paste
     });
   </script>
