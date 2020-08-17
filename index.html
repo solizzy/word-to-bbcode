@@ -39,9 +39,9 @@
     </style>
   </head>
 
-  <body>
+  <div>
     <textarea id="post"></textarea>
-  </body>
+  </div>
 
   <script>
     function bbcode(wrapper, input) {
@@ -79,8 +79,7 @@
 
       const container = document.querySelector("#post");
       container.innerText = text;
-      container.focus();
-      container.select(); //select all text for quick copy and paste
+      window.getSelection().selectAllChildren(container) //select all text for quick copy and paste
       e.preventDefault(); //prevent double paste
     });
   </script>
