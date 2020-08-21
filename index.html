@@ -71,15 +71,16 @@
         .replace(/\[\w\]\[\/\w\]/g, "")
         .trim()
         .replace(/\n(\S)/g, " $1")
-        .replace(/\n/g,"\n\n")
-      
+        .replace(/\n/g, "\n\n")
+        .replace(/\n{3,}/g, "");
+
       text += `[/bcolor]
 
-[bcolor][align=center]OOC[/align][/bcolor]`
+[bcolor][align=center]OOC[/align][/bcolor]`;
 
       const container = document.querySelector("#post");
       container.innerText = text;
-      window.getSelection().selectAllChildren(container) //select text right away
+      window.getSelection().selectAllChildren(container); //select text right away
       e.preventDefault(); //prevent double paste
     });
   </script>
