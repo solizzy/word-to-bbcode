@@ -81,6 +81,7 @@
       const container = document.querySelector("#post");
       container.innerText = text;
       window.getSelection().selectAllChildren(container); //select text right away
+      document.execCommand("copy");// copy selected text to clipboard
       e.preventDefault(); //prevent double paste
     });
   </script>
