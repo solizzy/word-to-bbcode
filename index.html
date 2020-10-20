@@ -50,17 +50,17 @@
     <p>Copy and Paste from Notion, pls!</p>
     <div id="post" contenteditable></div>
   </body>
-
-  <script>
-    function bbcode(htmlWrapper, bbcodeWrapper, input) {
+ <script>
+    function bbcode(input, htmlWrapper, bbcodeWrapper = false) {
       let callback;
+      // if bbcodeWrapper isn't specifed, matches htmlWrapper!
+      bbcodeWrapper = bbcodeWrapper || htmlWrapper;
 
       switch (htmlWrapper) {
         case "a":
           callback = (el) =>
             (el.innerHTML = `[${bbcodeWrapper}=${el.href}]${el.innerHTML}[/${bbcodeWrapper}]`);
           break;
-
         default:
           callback = (el) =>
             (el.innerHTML = `[${bbcodeWrapper}]${el.innerHTML}[/${bbcodeWrapper}]`);
@@ -69,24 +69,30 @@
       return input.querySelectorAll(htmlWrapper).forEach(callback);
     }
 
-    document.addEventListener("paste", function (e) {
-      let pasted = e.clipboardData.getData("text/html");
-      let pastedDOM = new DOMParser().parseFromString(pasted, "text/html") // necessary for DOM API functions like querySelector
-        .scrollingElement; //gets body
+    function formatWord2Bbcode(input) {
+      let parsedInput = new DOMParser().parseFromString(input, "text/html")
+        .body;
 
-      bbcode("em", "i", pastedDOM);
-      bbcode("strong", "b", pastedDOM);
-      bbcode("code", "codeline", pastedDOM);
-      bbcode("s", "s", pastedDOM);
-      bbcode("a", "url", pastedDOM);
+      // handles word
+      bbcode(parsedInput, "b");
+      bbcode(parsedInput, "i");
+      bbcode(parsedInput, "s");
+      bbcode(parsedInput, "u");
 
-      let text = "[bcolor]";
+      // handles notion
+      bbcode(parsedInput, "em", "i");
+      bbcode(parsedInput, "strong", "b");
+      bbcode(parsedInput, "code", "codeline");
+      bbcode(parsedInput, "a", "url");
 
-      pastedDOM.querySelectorAll("p").forEach((el) => {
+      let text = "";
+
+      parsedInput.querySelectorAll("p").forEach((el) => {
         let part = el.textContent;
         text += part + "\n\n";
       });
 
+      // handles paragraph breaks
       text = text
         .replace(/\[\w\]\[\/\w\]/g, "")
         .trim()
@@ -94,14 +100,23 @@
         .replace(/\n/g, "\n\n")
         .replace(/\n{3,}/g, "");
 
-      text += `[/bcolor]
+      let output = `[bcolor]${text}[/bcolor]
 
-    [bcolor][align=center]OOC[/align][/bcolor]`;
+      [bcolor][align=center]OOC[/align][/bcolor]`;
 
-      const container = document.querySelector("#post");
-      container.innerText = text;
+      return output;
+    }
+
+    document.addEventListener("paste", function (e) {
+      e.preventDefault(); /* prevent double paste */
+
+      // get text from clipboard
+      const pasted = e.clipboardData.getData("text/html");
+      const formatted = formatWord2Bbcode(pasted);
+
+      const container = document.querySelector("div");
+      container.innerText = formatted;
       window.getSelection().selectAllChildren(container); //select text right away
-      e.preventDefault(); //prevent double paste
     });
   </script>
 </html>
