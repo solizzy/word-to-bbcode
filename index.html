@@ -22,11 +22,11 @@
 
       #post {
         resize: vertical;
-        max-height: 80vh;
+        height: 80vh;
         overflow: auto;
         padding: 10px;
-        width: 700px;
-        height: 100%;
+        max-width: 700px;
+        width: 80%;
         min-height: 1rem;
         background: rgb(255, 255, 255);
         box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1);
@@ -47,10 +47,9 @@
   </head>
 
   <body>
-    <p>Copy and Paste from Notion, pls!</p>
     <div id="post" contenteditable></div>
   </body>
- <script>
+  <script>
     function bbcode(input, htmlWrapper, bbcodeWrapper = false) {
       let callback;
       // if bbcodeWrapper isn't specifed, matches htmlWrapper!
@@ -69,9 +68,8 @@
       return input.querySelectorAll(htmlWrapper).forEach(callback);
     }
 
-    function formatWord2Bbcode(input) {
-      let parsedInput = new DOMParser().parseFromString(input, "text/html")
-        .body;
+    function formatFromOther(parsedInput) {
+      let text = "";
 
       // handles word
       bbcode(parsedInput, "b");
@@ -84,8 +82,6 @@
       bbcode(parsedInput, "strong", "b");
       bbcode(parsedInput, "code", "codeline");
       bbcode(parsedInput, "a", "url");
-
-      let text = "";
 
       parsedInput.querySelectorAll("p").forEach((el) => {
         let part = el.textContent;
@@ -100,6 +96,68 @@
         .replace(/\n/g, "\n\n")
         .replace(/\n{3,}/g, "");
 
+      return text;
+    }
+
+    function formatFromGDOC(parsedInput) {
+      let output = "";
+
+      const paragraphs = parsedInput.querySelectorAll("p");
+
+      for (
+        let paragraphIndex = 0;
+        paragraphIndex < paragraphs.length;
+        paragraphIndex++
+      ) {
+        const paragraph = paragraphs[paragraphIndex];
+
+        const sentences = paragraph.querySelectorAll("span");
+
+        for (
+          let sentenceIndex = 0;
+          sentenceIndex < sentences.length;
+          sentenceIndex++
+        ) {
+          const sentence = sentences[sentenceIndex];
+          const { fontWeight, textDecoration, fontStyle } = sentence.style;
+          const isBold = parseInt(fontWeight) > 500;
+          const isItalic = fontStyle === "italic";
+          const isUnderline = textDecoration === "underline";
+          const isStrikethrough = textDecoration === "line-through";
+
+          if (isBold) sentence.innerText = `[b]${sentence.innerText}[/b]`;
+          if (isItalic) sentence.innerText = `[i]${sentence.innerText}[/i]`;
+          if (isUnderline) sentence.innerText = `[u]${sentence.innerText}[/u]`;
+          if (isStrikethrough)
+            sentence.innerText = `[s]${sentence.innerText}[/s]`;
+
+          output += sentence.innerText;
+        }
+
+        if (paragraphIndex < paragraphs.length - 1) {
+          output += "\n\n";
+        }
+      }
+
+      return output;
+    }
+
+    function format(input) {
+      let parsedInput = new DOMParser().parseFromString(input, "text/html")
+        .body;
+
+      let text = "";
+
+      // test if gdoc or not
+      let isGDOC = parsedInput.querySelector('[id^="docs-internal-guid"]');
+      if (isGDOC !== null) {
+        // parses gdoc
+        text = formatFromGDOC(parsedInput);
+      } else {
+        // parses word, notion
+        text = formatFromOther(parsedInput);
+      }
+
       let output = `[bcolor]${text}[/bcolor]
 
       [bcolor][align=center]OOC[/align][/bcolor]`;
@@ -112,9 +170,9 @@
 
       // get text from clipboard
       const pasted = e.clipboardData.getData("text/html");
-      const formatted = formatWord2Bbcode(pasted);
+      const formatted = format(pasted);
 
-      const container = document.querySelector("div");
+      const container = document.querySelector("#post");
       container.innerText = formatted;
       window.getSelection().selectAllChildren(container); //select text right away
     });
